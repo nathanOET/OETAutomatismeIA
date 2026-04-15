@@ -1,0 +1,1665 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>IA - Projet Automatisme</title>
+
+<style>
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;500;600&display=swap');
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  margin: 0; padding: 0;
+  background: var(--dark-50);
+  color: var(--dark-900);
+}
+
+.page { display:none; padding:30px; text-align:center; transition:0.3s; }
+.page.active { display:block; }
+
+/* ===== PAGE PRINCIPALE ===== */
+#mainPage {
+  height: 100vh;
+  background: linear-gradient(180deg, var(--teal-50) 0%, var(--dark-100) 40%, var(--dark-50) 100%);
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+  box-sizing: border-box;
+}
+#mainPage .main-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+#mainPage::before {
+  content: '';
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(18,106,135,0.07) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 20%, rgba(7,73,95,0.05) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* ─ En-tête page principale ─ */
+.main-header {
+  text-align: center;
+  padding: 18px 20px 10px;
+  flex-shrink: 0;
+}
+#mainPage h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.7rem; font-weight: 900;
+  background: linear-gradient(90deg, var(--teal-900), var(--teal-700), var(--teal-900));
+  background-size: 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 4s linear infinite;
+  letter-spacing: 0.08em;
+  margin: 0 0 8px;
+}
+.main-subtitle {
+  font-size: 0.78rem; color: var(--dark-500);
+  letter-spacing: 0.08em; text-transform: uppercase;
+  font-weight: 500; margin-bottom: 0;
+}
+
+
+
+/* ─ Layout principal deux colonnes ─ */
+.main-layout {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 0;
+  flex: 1;
+  min-height: 0;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 1300px;
+  padding: 10px 20px 20px;
+  box-sizing: border-box;
+}
+
+/* Colonne gauche : Concepts seul */
+.col-concepts {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;           /* centrage vertical */
+  padding: 10px 30px 10px 20px;
+  border-right: none;                /* on gère la barre via ::after */
+  min-width: 480px;
+  position: relative;
+}
+/* Barre séparatrice pleine hauteur */
+.col-concepts::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0; right: 0;
+  width: 1px;
+  background: linear-gradient(180deg, transparent 0%, var(--teal-200) 10%, var(--teal-200) 90%, transparent 100%);
+}
+.col-label {
+  font-size: 0.65rem; font-weight: 700; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--teal-700); opacity: 0.6;
+  margin-bottom: 8px;
+}
+
+/* Colonne droite : Phases + Bureautique empilés */
+.col-phases {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 20px 10px 30px;
+  align-self: stretch;              /* s'étire sur toute la hauteur du layout */
+}
+.col-phases-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+.col-phases-divider {
+  width: 100%;
+  display: flex; align-items: center; gap: 14px;
+  margin: 12px 0 10px;
+}
+.col-phases-divider-line {
+  flex: 1; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--teal-200), transparent);
+}
+.col-phases-divider-label {
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--teal-700); opacity: 0.55;
+  white-space: nowrap;
+}
+
+:root {
+  --teal-900: #07495F;
+  --teal-700: #126A87;
+  --teal-200: #B7DDEA;
+  --teal-50:  #ECF6F9;
+  --red-600:  #D92D20;
+  --red-400:  #F97066;
+  --red-200:  #FECDCA;
+  --orange-500: #F79009;
+  --orange-200: #FEDF89;
+  --green-600:  #57B53B;
+  --dark-900: #101C28;
+  --dark-500: #667685;
+  --dark-200: #EAEDF0;
+  --dark-100: #F2F5F7;
+  --dark-50:  #F9FAFB;
+}
+@keyframes shimmer { 0%{background-position:0%} 100%{background-position:200%} }
+
+/* Cercle principal */
+.circle-container {
+  position: relative;
+  margin: 0;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+/* Cercle gauche (Concepts) — grande taille */
+#circle-left {
+  width: 400px; height: 400px;
+}
+#circle-left::before {
+  content: '';
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 310px; height: 310px; border-radius: 50%;
+  border: 1px solid rgba(7,73,95,0.15);
+  pointer-events: none;
+}
+/* Cercle droit (Phases) — taille compacte */
+#circle-right {
+  width: 290px; height: 290px;
+}
+#circle-right::before {
+  content: '';
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 220px; height: 220px; border-radius: 50%;
+  border: 1px solid rgba(7,73,95,0.15);
+  pointer-events: none;
+}
+
+#circlesWrapper { display: flex; justify-content: center; gap: 80px; }
+#circleLeftWrapper, #circleRightWrapper { display: flex; justify-content: center; }
+
+/* Cercle label */
+.circle-label { position: absolute; }
+
+/* Title INSIDE the circle — perfectly centered */
+.circle-label-inside {
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  font-size: 1rem; font-weight: 800; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--teal-700); opacity: 0.85;
+  pointer-events: none; text-align: center; line-height: 1.4;
+}
+
+/* Icônes */
+.icon {
+  position: absolute;
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  color: var(--dark-900); font-weight: 700; font-size: 9px;
+  cursor: pointer; transition: transform 0.3s, box-shadow 0.3s;
+  text-align: center; line-height: 1.2;
+}
+/* Icônes du cercle gauche — grande taille */
+#circle-left .icon {
+  width: 100px; height: 100px;
+  font-size: 12px;
+}
+.icon:hover { transform: scale(1.15) !important; }
+
+.icon.Objectif, .icon.Analyse { background: radial-gradient(135deg, var(--teal-700), var(--teal-900)); box-shadow: 0 6px 20px rgba(7,73,95,0.35); }
+.icon.Pourquoi, .icon.Etude   { background: radial-gradient(135deg, var(--green-600), #3d8a28); box-shadow: 0 6px 20px rgba(87,181,59,0.35); }
+.icon.Rôle, .icon.Tests       { background: radial-gradient(135deg, var(--orange-500), #d4750a); box-shadow: 0 6px 20px rgba(247,144,9,0.35); color: var(--dark-900); }
+.icon.Outils, .icon.MiseEnService { background: radial-gradient(135deg, var(--teal-700), var(--teal-900)); box-shadow: 0 6px 20px rgba(18,106,135,0.35); }
+.icon.Pratiques, .icon.SAV    { background: radial-gradient(135deg, var(--red-600), #a82018); box-shadow: 0 6px 20px rgba(217,45,32,0.35); }
+.icon.Supports                { background: radial-gradient(135deg, var(--teal-900), #04303f); box-shadow: 0 6px 20px rgba(7,73,95,0.4); }
+
+.icon svg { width: 26px; height: 26px; margin-bottom: 3px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+#circle-left .icon svg { width: 38px; height: 38px; margin-bottom: 6px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.icon.Tests svg, .icon.Rôle svg { stroke: var(--dark-900); }
+
+/* ===== PAGE CLOUD (nuage de cas d'usage) ===== */
+#cloudPage {
+  min-height: 100vh;
+  background: var(--dark-100);
+  position: relative;
+}
+#cloudPage::before {
+  content: '';
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(ellipse at 50% 20%, rgba(18,106,135,0.1) 0%, transparent 60%);
+  pointer-events: none;
+}
+#cloudPage h2 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.8rem; letter-spacing: 0.1em;
+  padding: 14px 30px; border-radius: 50px;
+  display: inline-block; margin-bottom: 10px;
+  box-shadow: 0 4px 20px rgba(7,73,95,0.2);
+  color: white;
+}
+.cloud { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin-top: 40px; max-width: 900px; margin-left: auto; margin-right: auto; }
+.cloud-item {
+  padding: 14px 22px; border-radius: 30px; cursor: pointer;
+  font-weight: 600; font-size: 0.95rem;
+  box-shadow: 0 3px 12px rgba(7,73,95,0.15);
+  transition: transform 0.25s, box-shadow 0.25s;
+  border: 1px solid rgba(7,73,95,0.15);
+  backdrop-filter: blur(4px);
+}
+.cloud-item:hover { transform: translateY(-4px) scale(1.04); box-shadow: 0 10px 25px rgba(7,73,95,0.25); }
+
+/* ===== BOUTON RETOUR ===== */
+.backBtn {
+  margin-top: 35px; padding: 12px 28px;
+  cursor: pointer; background: var(--teal-50);
+  color: var(--teal-700); border: 1px solid var(--teal-200);
+  border-radius: 30px; font-size: 15px; font-weight: 600;
+  transition: all 0.3s;
+}
+.backBtn:hover { background: var(--teal-200); color: var(--teal-900); transform: translateY(-2px); }
+
+/* ===== POP-UP ===== */
+.popup-overlay {
+  display: none; position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(7,73,95,0.45); backdrop-filter: blur(8px);
+  z-index: 1000; justify-content: center; align-items: center;
+  animation: fadeIn 0.25s;
+}
+.popup-content {
+  background: linear-gradient(145deg, #ffffff, var(--teal-50));
+  border: 1px solid var(--teal-200);
+  padding: 32px; border-radius: 20px;
+  width: 90%; max-width: 520px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  animation: slideIn 0.3s forwards;
+  text-align: left;
+}
+.popup-content h3 { margin-top: 0; font-size: 1.3rem; color: var(--teal-900); }
+.popup-content p { margin: 12px 0; font-size: 0.95rem; line-height: 1.6; color: var(--dark-900); }
+.popup-content strong { color: var(--dark-500); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; }
+.popup-content code {
+  display: block; background: var(--teal-50);
+  border: 1px solid var(--teal-200);
+  padding: 10px 14px; border-radius: 8px; margin-top: 6px;
+  font-family: 'Courier New', monospace; font-size: 0.9rem;
+  color: var(--teal-900); line-height: 1.6;
+}
+.popup-content button { margin-top: 14px; padding: 10px 18px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; }
+.popup-content button.copyBtn { background: var(--green-600); color: white; margin-right: 10px; }
+.popup-content button.copyBtn:hover { background: #3d8a28; }
+.popup-content button.closeBtn { background: var(--red-200); color: var(--red-600); border: 1px solid var(--red-400); }
+.popup-content button.closeBtn:hover { background: var(--red-400); color: white; }
+
+@keyframes fadeIn { from {opacity:0;} to{opacity:1;} }
+@keyframes slideIn { from {transform:translateY(-20px); opacity:0;} to{transform:translateY(0); opacity:1;} }
+
+.page h2 { transition:0.3s; padding:10px; border-radius:5px; color:white; }
+
+/* === VUES ENRICHIES === */
+.rich-page {
+  background: linear-gradient(to right, var(--teal-50), var(--dark-100), var(--teal-50));
+  color: var(--dark-900);
+  height: 100vh;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+.rich-page .main-title {
+  font-size: 3rem;
+  background: linear-gradient(90deg, var(--teal-900), var(--teal-700), var(--green-600));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 30px;
+}
+
+/* ==========================================
+   PAGE OBJECTIF — Style "carte lumineuse"
+   ========================================== */
+#objectivePage {
+  background: radial-gradient(ellipse at 20% 50%, var(--teal-200) 0%, var(--teal-50) 60%, var(--dark-50) 100%);
+}
+#objectivePage .objective-content {
+  display: block;
+  max-width: 700px; margin: 0 auto; padding: 20px 40px 40px; text-align: left;
+}
+
+#objectivePage .objective-list { list-style: none; padding: 0; }
+#objectivePage .objective-list li {
+  display: flex; align-items: flex-start; margin-bottom: 22px;
+  animation: fadeInUp 0.5s ease-out forwards; opacity: 0;
+  background: white;
+  border: 1px solid var(--teal-200);
+  border-radius: 12px; padding: 16px 20px;
+  transition: border-color 0.3s, background 0.3s;
+}
+#objectivePage .objective-list li:hover { background: var(--teal-50); border-color: var(--teal-700); }
+#objectivePage .objective-list li:nth-child(1) { animation-delay: 0.2s; }
+#objectivePage .objective-list li:nth-child(2) { animation-delay: 0.4s; }
+#objectivePage .objective-list li:nth-child(3) { animation-delay: 0.6s; }
+#objectivePage .objective-list li:nth-child(4) { animation-delay: 0.8s; }
+#objectivePage .objective-list li:nth-child(5) { animation-delay: 1.0s; }
+#objectivePage .objective-list li:nth-child(6) { animation-delay: 1.2s; }
+#objectivePage .objective-list .li-icon { font-size: 2rem; margin-right: 18px; flex-shrink: 0; }
+#objectivePage .objective-list .li-text h3 { margin: 0 0 6px 0; color: var(--teal-700); font-size: 1.15rem; letter-spacing: 0.03em; }
+#objectivePage .objective-list .li-text p { margin: 0; font-size: 0.95rem; color: var(--dark-500); line-height: 1.6; }
+
+/* ==========================================
+   PAGE POURQUOI — Style "timeline futuriste"
+   ========================================== */
+#whyPage {
+  background: linear-gradient(135deg, var(--teal-50) 0%, var(--dark-100) 40%, var(--teal-50) 100%);
+}
+#whyPage .why-content { padding: 30px 20px; max-width: 1100px; margin: auto; }
+#whyPage .why-intro {
+  font-size: 1.15rem; color: var(--teal-900); max-width: 700px;
+  margin: 0 auto 40px; line-height: 1.8; text-align: center;
+}
+#whyPage .categories { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; }
+#whyPage .category {
+  background: white;
+  border: 1px solid var(--teal-200);
+  padding: 30px; border-radius: 20px; width: 380px; text-align: left;
+  position: relative; overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s;
+  animation: fadeInUp 0.6s ease-out forwards; opacity: 0;
+}
+#whyPage .category:nth-child(1) { animation-delay: 0.2s; }
+#whyPage .category:nth-child(2) { animation-delay: 0.45s; }
+#whyPage .category::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--teal-700), var(--green-600));
+}
+#whyPage .category:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(7,73,95,0.12); }
+#whyPage .category h3 { font-size: 1.3rem; color: var(--teal-700); margin-top: 0; margin-bottom: 18px; }
+#whyPage .category ul { list-style: none; padding: 0; }
+#whyPage .category li {
+  margin-bottom: 14px; color: var(--dark-900); font-size: 1rem; line-height: 1.5;
+  padding-left: 16px; position: relative;
+}
+#whyPage .category li::before {
+  content: '▸'; position: absolute; left: 0; color: var(--teal-700); font-size: 0.9rem; font-weight: bold;
+}
+
+/* ==========================================
+   PAGE RÔLE — Style "confrontation bold"
+   ========================================== */
+#rolePage {
+  background: linear-gradient(160deg, var(--dark-50) 0%, var(--teal-50) 50%, var(--dark-100) 100%);
+}
+#rolePage .role-content { padding: 20px; max-width: 1100px; margin: auto; }
+#rolePage .role-columns { display: flex; justify-content: center; gap: 30px; align-items: stretch; }
+#rolePage .role-column {
+  padding: 30px; border-radius: 20px; width: 380px; text-align: left;
+  position: relative; overflow: hidden;
+  animation: fadeInUp 0.6s ease-out forwards; opacity: 0;
+}
+#rolePage .role-column.do {
+  background: white;
+  border: 1px solid var(--teal-200);
+  animation-delay: 0.2s;
+}
+#rolePage .role-column.dont {
+  background: white;
+  border: 1px solid var(--red-200);
+  animation-delay: 0.4s;
+}
+#rolePage .role-column::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+}
+#rolePage .role-column.do::before { background: linear-gradient(90deg, var(--teal-700), var(--green-600)); }
+#rolePage .role-column.dont::before { background: linear-gradient(90deg, var(--red-600), var(--red-400)); }
+#rolePage .role-column h3 { font-size: 1.4rem; margin-top: 0; margin-bottom: 20px; }
+#rolePage .role-column.do h3 { color: var(--teal-700); }
+#rolePage .role-column.dont h3 { color: var(--red-600); }
+#rolePage .role-column ul { list-style: none; padding: 0; }
+#rolePage .role-column li { margin-bottom: 16px; font-size: 1.05rem; line-height: 1.5; color: var(--dark-900); }
+
+
+#rolePage .responsibility {
+  font-style: italic; color: var(--dark-500); max-width: 600px;
+  margin: 16px auto 0; font-size: 1rem; line-height: 1.7;
+  border-top: 1px solid var(--dark-200); padding-top: 16px;
+}
+
+/* ==========================================
+   PAGE OUTILS — Style "cards premium avec glow"
+   ========================================== */
+#toolsPage {
+  background: radial-gradient(ellipse at center top, var(--teal-200) 0%, var(--teal-50) 70%);
+}
+#toolsPage .tools-intro {
+  font-size: 1.05rem; color: var(--dark-500); margin: -10px auto 35px;
+  max-width: 600px; line-height: 1.7;
+}
+#toolsPage .tools-grid { display: flex; justify-content: center; gap: 30px; padding: 10px 20px 30px; flex-wrap: wrap; }
+#toolsPage .tool-card-link { text-decoration: none; color: inherit; }
+#toolsPage .tool-card {
+  background: white;
+  padding: 36px 28px; border-radius: 24px; width: 260px;
+  border: 1px solid var(--dark-200);
+  transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+  position: relative; overflow: hidden;
+  animation: fadeInUp 0.6s ease-out forwards; opacity: 0;
+}
+#toolsPage .tool-card:nth-child(1) { animation-delay: 0.15s; }
+#toolsPage .tool-card:nth-child(2) { animation-delay: 0.35s; }
+#toolsPage .tool-card:nth-child(3) { animation-delay: 0.55s; }
+#toolsPage .tool-card-chatgpt:hover { transform: translateY(-10px); box-shadow: 0 20px 50px rgba(116,170,156,0.35); border-color: rgba(116,170,156,0.5); }
+#toolsPage .tool-card-gemini:hover  { transform: translateY(-10px); box-shadow: 0 20px 50px rgba(142,117,180,0.35); border-color: rgba(142,117,180,0.5); }
+#toolsPage .tool-card-claude:hover  { transform: translateY(-10px); box-shadow: 0 20px 50px rgba(217,119,87,0.35);  border-color: rgba(217,119,87,0.5); }
+#toolsPage .tool-logo {
+  width: 72px; height: 72px; border-radius: 18px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.2rem; font-weight: 900; margin: 0 auto 22px;
+  color: white; letter-spacing: -1px;
+}
+#toolsPage .logo-chatgpt { background: linear-gradient(135deg, #74aa9c, #4a8a7c); box-shadow: 0 6px 20px rgba(116,170,156,0.4); }
+#toolsPage .logo-gemini  { background: linear-gradient(135deg, #8E75B4, #6a55a0); box-shadow: 0 6px 20px rgba(142,117,180,0.4); }
+#toolsPage .logo-claude  { background: linear-gradient(135deg, #D97757, #c05a35); box-shadow: 0 6px 20px rgba(217,119,87,0.4); }
+#toolsPage .tool-card h3 { font-size: 1.8rem; margin: 0 0 8px; font-weight: 800; color: var(--dark-900); }
+#toolsPage .tool-card .tool-desc { font-size: 0.9rem; color: var(--dark-500); margin-bottom: 16px; line-height: 1.5; }
+#toolsPage .tool-card .usage {
+  font-size: 0.8rem; padding: 5px 12px; border-radius: 20px;
+  display: inline-block; font-weight: 600; letter-spacing: 0.03em;
+}
+#toolsPage .tool-card-chatgpt .usage { background: rgba(116,170,156,0.2); color: #74aa9c; border: 1px solid rgba(116,170,156,0.3); }
+#toolsPage .tool-card-copilot:hover { transform: translateY(-10px); box-shadow: 0 20px 50px rgba(7,73,95,0.25); border-color: var(--teal-200); }
+#toolsPage .logo-copilot { background: linear-gradient(135deg, var(--teal-700), var(--teal-900)); box-shadow: 0 6px 20px rgba(18,106,135,0.4); }
+#toolsPage .tool-card-copilot .usage { background: var(--teal-50); color: var(--teal-700); border: 1px solid var(--teal-200); }
+#toolsPage .tools-others { max-width: 900px; margin: 20px auto 0; padding: 0 20px; }
+#toolsPage .tools-others-label { color: var(--dark-500); font-size: 0.9rem; font-weight: 600; margin-bottom: 12px; }
+#toolsPage .tools-others-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 14px; }
+.other-tool-pill { padding: 7px 16px; border-radius: 20px; background: white; border: 1px solid var(--teal-200); color: var(--teal-700); font-size: 0.9rem; font-weight: 600; text-decoration: none; transition: all 0.2s; }
+.other-tool-pill:hover { background: var(--teal-50); border-color: var(--teal-700); transform: translateY(-2px); }
+#toolsPage .tools-note { font-size: 0.82rem; color: var(--dark-500); font-style: italic; margin-top: 4px; }
+#toolsPage .tool-card-gemini  .usage { background: rgba(142,117,180,0.2); color: #b39ddb; border: 1px solid rgba(142,117,180,0.3); }
+#toolsPage .tool-card-claude  .usage { background: rgba(217,119,87,0.2);  color: #ffab8a; border: 1px solid rgba(217,119,87,0.3); }
+
+
+@keyframes fadeInUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* ==========================================
+   PAGE SUPPORTS — Style "portail tech violet"
+   ========================================== */
+#supportsPage {
+  background: radial-gradient(ellipse at 70% 20%, var(--teal-200) 0%, var(--teal-50) 60%);
+}
+#supportsPage .supports-content {
+  padding: 20px 20px 40px; max-width: 820px; margin: auto;
+}
+#supportsPage .supports-grid {
+  display: flex; flex-direction: column; gap: 20px;
+}
+#supportsPage .supports-card {
+  background: white;
+  border: 1px solid var(--teal-200);
+  border-radius: 20px; padding: 28px 32px;
+  display: flex; align-items: flex-start; gap: 22px;
+  text-align: left; position: relative; overflow: hidden;
+  animation: fadeInUp 0.6s ease-out forwards; opacity: 0;
+  transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+}
+#supportsPage .supports-card:nth-child(1) { animation-delay: 0.15s; }
+#supportsPage .supports-card:nth-child(2) { animation-delay: 0.35s; }
+#supportsPage .supports-card:nth-child(3) { animation-delay: 0.55s; }
+#supportsPage .supports-card::before {
+  content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 4px;
+  background: linear-gradient(180deg, var(--teal-700), var(--teal-900));
+}
+#supportsPage .supports-card:hover {
+  border-color: var(--teal-700);
+  transform: translateX(6px);
+  box-shadow: 0 8px 30px rgba(7,73,95,0.15);
+}
+#supportsPage .supports-card-icon {
+  font-size: 2.2rem; flex-shrink: 0; line-height: 1;
+  margin-top: 2px;
+}
+#supportsPage .supports-card-body { flex: 1; }
+#supportsPage .supports-card h3 {
+  font-size: 1.25rem; color: var(--teal-900); margin: 0 0 10px 0;
+  font-weight: 700;
+}
+#supportsPage .supports-card p {
+  margin: 0 0 16px 0; font-size: 1rem; color: var(--dark-500); line-height: 1.7;
+}
+#supportsPage .supports-link {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--teal-50); color: var(--teal-700);
+  border: 1px solid var(--teal-200);
+  text-decoration: none; padding: 9px 18px; border-radius: 25px;
+  font-weight: 600; font-size: 0.9rem;
+  transition: all 0.3s;
+}
+#supportsPage .supports-link:hover {
+  background: var(--teal-200); color: var(--teal-900);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(111,66,193,0.35);
+}
+#supportsPage .tip-box {
+  background: var(--orange-200);
+  border: 1px dashed var(--orange-500);
+  border-radius: 12px; padding: 14px 18px;
+  font-style: italic; font-size: 0.95rem;
+  color: var(--dark-900); line-height: 1.6;
+}
+/* ==========================================
+   PAGE PRATIQUES — Style "tableau de bord"
+   ========================================== */
+#pratiquesPage {
+  background: linear-gradient(150deg, var(--teal-50) 0%, var(--dark-100) 50%, var(--dark-50) 100%);
+}
+#pratiquesPage .pratiques-content { padding: 20px; max-width: 1100px; margin: auto; }
+#pratiquesPage .pratiques-columns { display: flex; justify-content: center; gap: 28px; align-items: flex-start; flex-wrap: wrap; }
+#pratiquesPage .pratiques-column {
+  border-radius: 22px; width: 430px; text-align: left;
+  position: relative; overflow: hidden;
+  animation: fadeInUp 0.6s ease-out forwards; opacity: 0;
+}
+#pratiquesPage .pratiques-column.do {
+  background: white;
+  border: 1px solid var(--teal-200);
+  animation-delay: 0.15s;
+}
+#pratiquesPage .pratiques-column.dont {
+  background: white;
+  border: 1px solid var(--red-200);
+  animation-delay: 0.35s;
+}
+#pratiquesPage .pratiques-column .col-header {
+  padding: 22px 26px 18px;
+  border-bottom: 1px solid var(--dark-200);
+  margin-bottom: 4px;
+}
+#pratiquesPage .pratiques-column h3 {
+  font-size: 1.35rem; margin: 0;
+  font-weight: 700; letter-spacing: 0.02em;
+}
+#pratiquesPage .pratiques-column.do h3 { color: var(--teal-700); }
+#pratiquesPage .pratiques-column.dont h3 { color: var(--red-600); }
+#pratiquesPage .pratiques-column ul { list-style: none; padding: 10px 26px 22px; margin: 0; }
+#pratiquesPage .pratiques-column li {
+  margin-bottom: 0;
+  font-size: 0.97rem; line-height: 1; color: #2c3a2c;
+  opacity: 0;
+  animation: fadeInUp 0.45s ease-out forwards;
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--dark-200);
+}
+#pratiquesPage .pratiques-column li:last-child { border-bottom: none; }
+#pratiquesPage .pratiques-column.do li::before {
+  content: '✓'; color: var(--teal-700); font-weight: 900;
+  font-size: 1rem; flex-shrink: 0; margin-top: 1px;
+}
+#pratiquesPage .pratiques-column.dont li::before {
+  content: '✕'; color: var(--red-600); font-weight: 900;
+  font-size: 1rem; flex-shrink: 0; margin-top: 1px;
+}
+#pratiquesPage .pratiques-column li:nth-child(1) { animation-delay: 0.3s; }
+#pratiquesPage .pratiques-column li:nth-child(2) { animation-delay: 0.5s; }
+#pratiquesPage .pratiques-column li:nth-child(3) { animation-delay: 0.7s; }
+#pratiquesPage .pratiques-column li:nth-child(4) { animation-delay: 0.9s; }
+/* Pratiques tip box */
+#pratiquesPage .pratiques-tip {
+  display: flex; align-items: flex-start; gap: 18px;
+  max-width: 860px; margin: 28px auto 0;
+  background: white; border: 1px solid var(--orange-200);
+  border-left: 4px solid var(--orange-500);
+  border-radius: 16px; padding: 24px 28px; text-align: left;
+  animation: fadeInUp 0.6s ease-out 0.8s both;
+}
+#pratiquesPage .pratiques-tip-icon { font-size: 2.2rem; flex-shrink: 0; }
+#pratiquesPage .pratiques-tip-body h3 { margin: 0 0 8px; color: var(--teal-900); font-size: 1.1rem; }
+#pratiquesPage .pratiques-tip-body p { margin: 0 0 12px; color: var(--dark-500); font-size: 0.95rem; }
+#pratiquesPage .pratiques-tip-body ol { margin: 0; padding-left: 18px; }
+#pratiquesPage .pratiques-tip-body li { color: var(--dark-900); font-size: 0.95rem; margin-bottom: 6px; line-height: 1.5; }
+#pratiquesPage .pratiques-tip-body strong { color: var(--teal-700); }
+
+
+/* =====================================================
+   SECTION BUREAUTIQUE — Cartes visibles page principale
+   ===================================================== */
+#bureautiqueSection {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  position: relative; z-index: 1;
+}
+#bureautiqueSection .bureau-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--teal-700); opacity: 0.6;
+  margin-bottom: 18px; text-align: center;
+}
+#bureautiqueSection .bureau-title span {
+  display: inline-block;
+  padding: 6px 20px;
+}
+.bureau-cards {
+  display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; align-items: stretch;
+  width: 100%;
+}
+.bureau-card {
+  background: white;
+  border: 1px solid var(--teal-200);
+  border-radius: 16px;
+  width: 200px;
+  overflow: hidden;
+  cursor: pointer;
+  display: flex; flex-direction: column;
+  transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+  animation: fadeInUp 0.6s ease-out both;
+  box-shadow: 0 2px 10px rgba(7,73,95,0.08);
+}
+.bureau-card:nth-child(1) { animation-delay: 0.1s; }
+.bureau-card:nth-child(2) { animation-delay: 0.25s; }
+.bureau-card:nth-child(3) { animation-delay: 0.4s; }
+.bureau-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 32px rgba(7,73,95,0.18);
+  border-color: var(--teal-700);
+}
+.bureau-card-header {
+  padding: 10px 14px;
+  display: flex; align-items: center; gap: 12px;
+}
+.bureau-card:nth-child(1) .bureau-card-header { background: linear-gradient(135deg, var(--teal-700), var(--teal-900)); }
+.bureau-card:nth-child(2) .bureau-card-header { background: linear-gradient(135deg, var(--dark-500), var(--dark-900)); }
+.bureau-card:nth-child(3) .bureau-card-header { background: linear-gradient(135deg, #2a7a50, #1a5034); }
+.bureau-card-header-icon { font-size: 1.1rem; flex-shrink: 0; }
+.bureau-card-header-text h3 {
+  margin: 0 0 2px; font-size: 0.88rem; font-weight: 700;
+  color: white; line-height: 1.3;
+}
+.bureau-card-header-text p { margin: 0; font-size: 0.72rem; color: rgba(255,255,255,0.65); }
+.bureau-card-body { padding: 8px 12px 12px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+.bureau-card-steps { list-style: none; padding: 0; margin: 0 0 14px; }
+.bureau-card-steps li {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 5px 0; border-bottom: 1px solid var(--dark-100);
+  font-size: 0.78rem; color: var(--dark-900); line-height: 1.35;
+}
+.bureau-card-steps li:last-child { border-bottom: none; }
+.bureau-step-num {
+  background: var(--teal-200); color: var(--teal-900);
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.72rem; font-weight: 800; flex-shrink: 0; margin-top: 1px;
+}
+.bureau-card:nth-child(2) .bureau-step-num { background: var(--dark-200); color: var(--dark-900); }
+.bureau-card:nth-child(3) .bureau-step-num { background: rgba(42,122,80,0.15); color: #1a5034; }
+.bureau-card:nth-child(2) .bureau-card-cta { background: var(--dark-100); border-color: var(--dark-200); color: var(--dark-500); }
+.bureau-card:nth-child(2):hover .bureau-card-cta { background: var(--dark-200); color: var(--dark-900); }
+.bureau-card:nth-child(3) .bureau-card-cta { background: rgba(42,122,80,0.06); border-color: rgba(42,122,80,0.25); color: #1a5034; }
+.bureau-card:nth-child(3):hover .bureau-card-cta { background: rgba(42,122,80,0.15); }
+.bureau-card-cta {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  background: var(--teal-50); border: 1px solid var(--teal-200);
+  border-radius: 8px; padding: 6px 12px;
+  font-size: 0.76rem; font-weight: 700; color: var(--teal-700);
+  transition: background 0.2s;
+}
+.bureau-card:hover .bureau-card-cta {
+  background: var(--teal-200); color: var(--teal-900);
+}
+
+/* ── PAGE GUIDE BUREAUTIQUE ── */
+#bureauPage {
+  background: linear-gradient(160deg, var(--teal-50) 0%, var(--dark-100) 50%, var(--dark-50) 100%);
+  min-height: 100vh; color: var(--dark-900);
+}
+#bureauPage .bureau-page-inner {
+  max-width: 860px; margin: 0 auto; padding: 20px 30px 50px;
+}
+#bureauPage .bureau-page-title {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 28px;
+}
+#bureauPage .bureau-page-title h1 {
+  font-size: 1.8rem; font-weight: 800; color: var(--teal-900); margin: 0;
+}
+.bureau-guide-step {
+  background: white; border: 1px solid var(--dark-200);
+  border-radius: 18px; margin-bottom: 16px; overflow: hidden;
+}
+.bureau-guide-step-header {
+  display: flex; align-items: center; gap: 14px;
+  padding: 18px 22px; background: var(--dark-100);
+  border-bottom: 1px solid var(--dark-200);
+  cursor: pointer; transition: background 0.2s;
+}
+.bureau-guide-step-header:hover { background: var(--teal-50); }
+.bureau-guide-step-badge {
+  background: var(--teal-700); color: white;
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.85rem; font-weight: 800; flex-shrink: 0;
+}
+.bureau-guide-step-title { font-weight: 700; color: var(--teal-900); font-size: 1rem; flex: 1; }
+.bureau-guide-chevron { color: var(--dark-500); transition: transform 0.3s; }
+.bureau-guide-step.expanded .bureau-guide-chevron { transform: rotate(180deg); }
+.bureau-guide-body { padding: 20px 24px; display: none; }
+.bureau-guide-step.expanded .bureau-guide-body { display: block; }
+.bureau-guide-body p { font-size: 0.92rem; color: var(--dark-900); line-height: 1.7; margin: 0 0 12px; }
+.bureau-guide-do { background: rgba(87,181,59,0.08); border-left: 3px solid var(--green-600); border-radius: 0 8px 8px 0; padding: 10px 14px; margin: 8px 0; font-size: 0.88rem; color: #1a5010; }
+.bureau-guide-dont { background: rgba(217,45,32,0.07); border-left: 3px solid var(--red-600); border-radius: 0 8px 8px 0; padding: 10px 14px; margin: 8px 0; font-size: 0.88rem; color: #5a1a10; }
+.bureau-guide-tip { background: var(--orange-200); border: 1px solid var(--orange-500); border-radius: 10px; padding: 10px 14px; margin: 8px 0; font-size: 0.88rem; color: #5a3a00; }
+.bureau-guide-list { list-style: none; padding: 0; margin: 0 0 12px; }
+.bureau-guide-list li { padding: 5px 0 5px 18px; position: relative; font-size: 0.88rem; color: var(--dark-900); line-height: 1.5; }
+.bureau-guide-list li::before { content: '▸'; position: absolute; left: 0; color: var(--teal-700); font-weight: bold; }
+.bureau-pos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+.bureau-pos-card { background: var(--dark-100); border-radius: 12px; padding: 14px; border: 1px solid var(--dark-200); }
+.bureau-pos-card h4 { margin: 0 0 8px; font-size: 0.85rem; }
+.bureau-pos-card.do h4 { color: var(--teal-700); }
+.bureau-pos-card.dont h4 { color: var(--red-600); }
+.bureau-pos-card ul { list-style: none; padding: 0; margin: 0; }
+.bureau-pos-card li { font-size: 0.82rem; color: var(--dark-900); padding: 3px 0 3px 16px; position: relative; line-height: 1.4; }
+.bureau-pos-card.do li::before { content: '✓'; position: absolute; left: 0; color: var(--green-600); font-weight: 700; }
+.bureau-pos-card.dont li::before { content: '✕'; position: absolute; left: 0; color: var(--red-600); font-weight: 700; }
+.prompt-box { background: var(--teal-50); border: 1px solid var(--teal-200); border-radius: 12px; overflow: hidden; margin-top: 14px; }
+.prompt-box-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--teal-200); }
+.prompt-box-label { font-size: 0.75rem; font-weight: 700; color: var(--teal-900); letter-spacing: 0.08em; text-transform: uppercase; }
+.prompt-copy-btn { background: var(--teal-700); color: white; border: none; cursor: pointer; padding: 5px 14px; border-radius: 6px; font-size: 0.78rem; font-weight: 600; transition: background 0.2s; }
+.prompt-copy-btn:hover { background: var(--teal-900); }
+.prompt-box pre { margin: 0; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.82rem; color: var(--teal-900); line-height: 1.65; white-space: pre-wrap; word-break: break-word; }
+
+/* === FIN VUES ENRICHIES === */
+
+</style>
+
+</head>
+
+<body>
+
+<!-- PAGE PRINCIPALE -->
+<div id="mainPage" class="page active">
+<div class="main-inner">
+
+  <!-- En-tête -->
+  <div class="main-header">
+    <h1>Automatisme &amp; IA</h1>
+    <p class="main-subtitle">Découverte des outils &amp; des bonnes pratiques</p>
+  </div>
+
+  <!-- Layout deux colonnes -->
+  <div class="main-layout">
+
+    <!-- ╔══════════════════════════════╗ -->
+    <!-- ║  COLONNE GAUCHE : CONCEPTS   ║ -->
+    <!-- ╚══════════════════════════════╝ -->
+    <div class="col-concepts">
+      <div id="circleLeftWrapper"></div>
+    </div>
+
+    <!-- ╔═══════════════════════════════════════════╗ -->
+    <!-- ║  COLONNE DROITE : PHASES + BUREAUTIQUE    ║ -->
+    <!-- ╚═══════════════════════════════════════════╝ -->
+    <div class="col-phases">
+
+      <!-- Phases projet -->
+      <div class="col-phases-top">
+        <div class="col-label">Phases Projet Automatisme</div>
+        <div id="circleRightWrapper"></div>
+      </div>
+
+      <!-- Séparateur -->
+      <div class="col-phases-divider">
+        <div class="col-phases-divider-line"></div>
+        <div class="col-phases-divider-label">IA Bureautique</div>
+        <div class="col-phases-divider-line"></div>
+      </div>
+
+      <!-- Cartes Bureautique -->
+      <section id="bureautiqueSection">
+        <div class="bureau-cards">
+
+      <div class="bureau-card" onclick="showBureauPage('cadre')">
+        <div class="bureau-card-header">
+          <span class="bureau-card-header-icon">🧭</span>
+          <div class="bureau-card-header-text">
+            <h3>Cadre &amp; Positionnement</h3>
+            <p>Comprendre le rôle de l'IA en bureautique</p>
+          </div>
+        </div>
+        <div class="bureau-card-body">
+          <ul class="bureau-card-steps">
+            <li><span class="bureau-step-num">✓</span>Ce que l'IA peut (et ne peut pas) faire</li>
+            <li><span class="bureau-step-num">✓</span>Usages documentaires typiques</li>
+            <li><span class="bureau-step-num">✓</span>Posture de l'automaticien face à l'IA</li>
+          </ul>
+          <div class="bureau-card-cta">Voir le guide →</div>
+        </div>
+      </div>
+
+      <div class="bureau-card" onclick="showBureauPage('af')">
+        <div class="bureau-card-header">
+          <span class="bureau-card-header-icon">📋</span>
+          <div class="bureau-card-header-text">
+            <h3>Analyse Fonctionnelle</h3>
+            <p>Générer et corriger une AF avec l'IA</p>
+          </div>
+        </div>
+        <div class="bureau-card-body">
+          <ul class="bureau-card-steps">
+            <li><span class="bureau-step-num">1</span>Préparer &amp; anonymiser les sources</li>
+            <li><span class="bureau-step-num">2</span>Générer une AF structurée</li>
+            <li><span class="bureau-step-num">3</span>Améliorer &amp; corriger une AF existante</li>
+          </ul>
+          <div class="bureau-card-cta">Voir les prompts →</div>
+        </div>
+      </div>
+
+      <div class="bureau-card" onclick="showBureauPage('reunion')">
+        <div class="bureau-card-header">
+          <span class="bureau-card-header-icon">📝</span>
+          <div class="bureau-card-header-text">
+            <h3>Synthèse de Réunion</h3>
+            <p>Transformer des notes brutes en CR structuré</p>
+          </div>
+        </div>
+        <div class="bureau-card-body">
+          <ul class="bureau-card-steps">
+            <li><span class="bureau-step-num">1</span>Préparer les notes &amp; anonymiser</li>
+            <li><span class="bureau-step-num">2</span>Formuler le prompt de structuration</li>
+            <li><span class="bureau-step-num">3</span>Vérifier &amp; ajuster le résultat</li>
+          </ul>
+          <div class="bureau-card-cta">Voir les prompts →</div>
+        </div>
+      </div>
+
+        </div>
+      </section>
+
+    </div><!-- /col-phases -->
+  </div><!-- /main-layout -->
+</div><!-- /main-inner -->
+</div>
+
+<!-- PAGE OBJECTIF -->
+<div id="objectivePage" class="page rich-page">
+  <div class="objective-content">
+    <div class="objective-text">
+      <h1 class="main-title">🎯 Objectif du support</h1>
+      <ul class="objective-list">
+        <li><div class="li-icon">💡</div><div class="li-text"><h3>Informer & Rassurer</h3><p>Informer, rassurer et rendre l’IA utile immédiatement dans le métier d’automaticien.</p></div></li>
+        <li><div class="li-icon">🤝</div><div class="li-text"><h3>Partager les Acquis</h3><p>Partager ce qui marche déjà chez nos collaborateurs.</p></div></li>
+        <li><div class="li-icon">🛠️</div><div class="li-text"><h3>Rendre l'IA Utile & Concrète</h3><p>Fournir des cas d'usages, des outils et des pratiques directement applicables à nos projets.</p></div></li>
+        <li><div class="li-icon">🏆</div><div class="li-text"><h3>Sécuriser & Optimiser</h3><p>Établir un cadre clair pour viser un gain de productivité tangible, sans risque pour nos données.</p></div></li>
+        <li><div class="li-icon">🔒</div><div class="li-text"><h3>Donner un cadre clair &amp; sécurisé</h3><p>Définir les règles d'utilisation pour que chacun puisse utiliser l'IA en toute confiance.</p></div></li>
+        <li><div class="li-icon">⏱️</div><div class="li-text"><h3>Gagner en productivité</h3><p>Identifier les usages concrets qui font gagner du temps dès maintenant dans le quotidien de l'automaticien.</p></div></li>
+      </ul>
+    </div>
+  </div>
+  <button class="backBtn" onclick="goBackMain()">⬅ Retour</button>
+</div>
+
+<!-- PAGE POURQUOI -->
+<div id="whyPage" class="page rich-page">
+  <div class="why-content">
+    <h1 class="main-title">🚀 Pourquoi l’IA en automatisme ?</h1>
+    <p class="why-intro">L’IA ne remplace pas l’automaticien — elle lui libère du temps pour ce qui compte vraiment. Voici les deux domaines où elle apporte une valeur immédiate.</p>
+    <div class="categories">
+      <div class="category">
+        <h3>📁 Bureautique &amp; Organisation</h3>
+        <ul>
+          <li>Reformulations et corrections de texte</li>
+          <li>Traduction de mails et IHM</li>
+          <li>Synthèse de réunions et d'analyses fonctionnelles</li>
+          <li>Recherche rapide dans la documentation</li>
+        </ul>
+      </div>
+      <div class="category">
+        <h3>⚙️ Ingénierie &amp; Automatisme</h3>
+        <ul>
+          <li>Génération de code (VBA, PL7…)</li>
+          <li>Analyse logique avant développement</li>
+          <li>Aide au dépannage matériel et logiciel</li>
+          <li>Automatisation des tâches répétitives</li>
+          <li>Recherche précise dans la documentation technique</li>
+        </ul>
+      </div>
+      <div class="category">
+        <h3>🏆 Les bénéfices clés</h3>
+        <ul>
+          <li>⏱ Gain de temps significatif</li>
+          <li>✅ Moins d'erreurs, meilleure rigueur</li>
+          <li>📄 Meilleure qualité documentaire</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <button class="backBtn" onclick="goBackMain()">⬅ Retour</button>
+</div>
+
+<!-- PAGE RÔLE -->
+<div id="rolePage" class="page rich-page">
+  <div class="role-content">
+    <h1 class="main-title">📈 Ce que l’IA peut (et ne peut pas) faire</h1>
+    <div class="role-columns">
+      <div class="role-column do">
+        <h3>✅ L’IA est un Assistant</h3>
+        <ul>
+          <li>✅ Aide à réfléchir et à structurer</li>
+          <li>✅ Aide au développement et à la vérification</li>
+          <li>✅ Propose des pistes et des alternatives</li>
+          <li>✅ Accélère la recherche documentaire</li>
+        </ul>
+      </div>
+      <div class="role-column dont">
+        <h3>❌ L’IA n’est PAS un Expert</h3>
+        <ul>
+          <li>❌ Un expert terrain — elle ne connaît pas votre site</li>
+          <li>❌ Un remplaçant de l'automaticien</li>
+          <li>❌ Une source de "vérité absolue"</li>
+          <li>❌ Responsable du résultat final</li>
+        </ul>
+      </div>
+    </div>
+    <p class="responsibility">L’automaticien reste le seul pilote — la responsabilité finale lui incombe toujours.</p>
+  </div>
+  <button class="backBtn" onclick="goBackMain()">⬅ Retour</button>
+</div>
+
+<!-- PAGE OUTILS -->
+<div id="toolsPage" class="page rich-page">
+  <h1 class="main-title">🔧 Outils IA Recommandés</h1>
+  <p class="tools-intro">Trois assistants IA complémentaires, chacun avec ses points forts. Cliquez pour y accéder directement.</p>
+  <div class="tools-grid">
+    <a href="https://chat.openai.com/" target="_blank" class="tool-card-link">
+      <div class="tool-card tool-card-chatgpt">
+        <div class="tool-logo logo-chatgpt">C</div>
+        <h3>ChatGPT</h3>
+        <p class="tool-desc">Le plus polyvalent pour la rédaction, la reformulation et les tâches bureautiques du quotidien.</p>
+        <span class="usage">Bureautique & Organisation</span>
+      </div>
+    </a>
+    <a href="https://gemini.google.com/" target="_blank" class="tool-card-link">
+      <div class="tool-card tool-card-gemini">
+        <div class="tool-logo logo-gemini">G</div>
+        <h3>Gemini</h3>
+        <p class="tool-desc">Intégré à l'écosystème Google, idéal pour l'analyse de données et les projets d'ingénierie.</p>
+        <span class="usage">Ingénierie & Automatisme</span>
+      </div>
+    </a>
+    <a href="https://claude.ai/" target="_blank" class="tool-card-link">
+      <div class="tool-card tool-card-claude">
+        <div class="tool-logo logo-claude">C</div>
+        <h3>Claude</h3>
+        <p class="tool-desc">Excellente compréhension du contexte technique, idéal pour le code et les analyses complexes.</p>
+        <span class="usage">Ingénierie & Automatisme</span>
+      </div>
+    </a>
+    <a href="https://copilot.microsoft.com/" target="_blank" class="tool-card-link">
+      <div class="tool-card tool-card-copilot">
+        <div class="tool-logo logo-copilot">M</div>
+        <h3>Copilot</h3>
+        <p class="tool-desc">Intégré à Microsoft 365 — accessible directement depuis Teams, Word et Outlook.</p>
+        <span class="usage">Bureautique & Organisation</span>
+      </div>
+    </a>
+  </div>
+  <div class="tools-others">
+    <p class="tools-others-label">✨ Autres outils :</p>
+    <div class="tools-others-list">
+      <a href="https://gamma.app" target="_blank" class="other-tool-pill">Gamma</a>
+      <a href="https://www.perplexity.ai" target="_blank" class="other-tool-pill">Perplexity</a>
+      <a href="https://notebooklm.google.com" target="_blank" class="other-tool-pill">Notebook LM</a>
+      <a href="https://firefly.adobe.com" target="_blank" class="other-tool-pill">Adobe Firefly</a>
+      <a href="https://runwayml.com" target="_blank" class="other-tool-pill">Runway</a>
+    </div>
+    <p class="tools-note">⚠️ Disponibles gratuitement en version limitée — privilégiez les outils validés par votre DSI dans le cadre professionnel.</p>
+  </div>
+  <button class="backBtn" onclick="goBackMain()">⬅ Retour</button>
+</div>
+
+
+<!-- PAGE SUPPORTS -->
+<div id="supportsPage" class="page rich-page">
+  <div class="supports-content">
+    <h1 class="main-title">🧩 Supports IA</h1>
+    <div class="supports-grid">
+
+      <div class="supports-card">
+        <div class="supports-card-icon">🏛️</div>
+        <div class="supports-card-body">
+          <h3>Le Comité IA de l'entreprise</h3>
+          <p>Pour toute question sur l'IA dans nos activités, le Comité IA est votre référence. Retrouvez ses missions, ses membres et les projets en cours sur le portail interne.</p>
+          <a href="https://altenovcom.sharepoint.com/sites/SiteDSI/SitePages/Pr%C3%A9sentation-du-comit%C3%A9-IA---les-missions,-les-membres-et-les-projet-en-cours.aspx?csf=1&web=1&e=UaO9ju&CID=ff7b85ea-d864-4ea4-98e3-2035b5e7770e" target="_blank" class="supports-link">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l7.59-7.59L21 8l-9 9z"/></svg>
+            Accéder au portail du Comité IA
+          </a>
+        </div>
+      </div>
+
+      <div class="supports-card">
+        <div class="supports-card-icon">💬</div>
+        <div class="supports-card-body">
+          <h3>Des questions ? Demandez à l'IA !</h3>
+          <p>Après avoir consulté les ressources du site, il est tout à fait normal d'avoir encore des questions. Si elles portent sur le fonctionnement des IA… n'hésitez pas à les poser directement à l'IA concernée !</p>
+          <div class="tip-box">😄 Toujours demander à la chose concernée — c'est le principe même de l'IA.</div>
+        </div>
+      </div>
+
+      <div class="supports-card">
+        <div class="supports-card-icon">📋</div>
+        <div class="supports-card-body">
+          <h3>Communication Bonnes Pratiques</h3>
+          <p>Le Comité IA a rédigé une communication officielle sur les bonnes pratiques d'utilisation. Vous la retrouverez également sur le portail interne.</p>
+          <a href="https://altenovcom.sharepoint.com/sites/SiteDSI/SitePages/Pr%C3%A9sentation-du-comit%C3%A9-IA---les-missions,-les-membres-et-les-projet-en-cours.aspx?csf=1&web=1&e=UaO9ju&CID=ff7b85ea-d864-4ea4-98e3-2035b5e7770e" target="_blank" class="supports-link">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM6 20V4h5v7h7v9H6z"/></svg>
+            Voir la communication Bonnes Pratiques
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <button class="backBtn" onclick="goBackMain()">⬅ Retour</button>
+</div>
+
+<!-- PAGE PRATIQUES -->
+<div id="pratiquesPage" class="page rich-page">
+  <div class="pratiques-content">
+    <h1 class="main-title">👍 Bonnes pratiques d'utilisation</h1>
+    <div class="pratiques-columns">
+      <div class="pratiques-column do">
+        <div class="col-header"><h3>✅ À faire</h3></div>
+        <ul>
+          <li>Donner du contexte (type d'installation, objectif, contraintes, norme, environnement).</li>
+          <li>Découper les demandes (une tâche = une question).</li>
+          <li>Utiliser des données anonymisées (extraits génériques, noms fictifs).</li>
+          <li>Paramétrer les IA pour plus de confidentialité.</li>
+        </ul>
+      </div>
+      <div class="pratiques-column dont">
+        <div class="col-header"><h3>❌ À ne pas faire</h3></div>
+        <ul>
+          <li>Communiquer des informations sensibles (noms clients, adresses IP, données contractuelles).</li>
+          <li>Valider un programme ou une AF sans relecture humaine.</li>
+          <li>Faire confiance à 100 % aux réponses.</li>
+          <li>Utiliser des outils publics d'IA non listés par la DSI dans le cadre professionnel.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="pratiques-tip">
+    <div class="pratiques-tip-icon">🔐</div>
+    <div class="pratiques-tip-body">
+      <h3>Paramétrage de confidentialité ChatGPT</h3>
+      <p>Pour désactiver l'utilisation de vos données pour l'entraînement du modèle :</p>
+      <ol>
+        <li>Cliquez sur votre photo ou vos initiales en bas à gauche</li>
+        <li>Allez dans <strong>« Paramètres »</strong></li>
+        <li>Onglet <strong>« Gestion des données »</strong></li>
+        <li>Désactivez <strong>« Améliorer le modèle pour tout le monde »</strong></li>
+      </ol>
+    </div>
+  </div>
+  <button class="backBtn" onclick="goBackMain()">⬅ Retour</button>
+</div>
+
+
+<!-- PAGE GUIDE CADRE -->
+<div id="bureauCadrePage" class="page">
+  <div id="bureauPage">
+    <div class="bureau-page-inner">
+      <div class="bureau-page-title">
+        <span style="font-size:2rem">🧭</span>
+        <h1>Cadre &amp; Positionnement</h1>
+      </div>
+
+      <div class="bureau-guide-step expanded">
+        <div class="bureau-guide-step-header" onclick="toggleBureauStep(this)">
+          <div class="bureau-guide-step-badge">💡</div>
+          <span class="bureau-guide-step-title">L'IA en bureautique — c'est quoi exactement ?</span>
+          <span class="bureau-guide-chevron">▼</span>
+        </div>
+        <div class="bureau-guide-body">
+          <p>Pour l'automaticien, l'IA en bureautique ce n'est <strong>pas du développement code</strong>. C'est du <strong>support documentaire métier</strong> : rédiger, structurer, relire, normaliser.</p>
+          <div class="bureau-guide-tip">💡 Usages concrets : rédaction d'AF, synthèse de réunion, exploitation de PDF, préparation de mails techniques client, structuration de livrables.</div>
+          <div class="bureau-pos-grid">
+            <div class="bureau-pos-card do">
+              <h4>✅ L'IA est un…</h4>
+              <ul>
+                <li>Assistant structurant</li>
+                <li>Aide à la relecture</li>
+                <li>Aide à la normalisation</li>
+                <li>Outil de vérification</li>
+              </ul>
+            </div>
+            <div class="bureau-pos-card dont">
+              <h4>❌ L'IA n'est pas…</h4>
+              <ul>
+                <li>Un remplaçant de l'expertise</li>
+                <li>Un validateur autonome</li>
+                <li>Connaisseur de vos standards sans contexte</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bureau-guide-step">
+        <div class="bureau-guide-step-header" onclick="toggleBureauStep(this)">
+          <div class="bureau-guide-step-badge">📁</div>
+          <span class="bureau-guide-step-title">Usages documentaires typiques</span>
+          <span class="bureau-guide-chevron">▼</span>
+        </div>
+        <div class="bureau-guide-body">
+          <ul class="bureau-guide-list">
+            <li>Rédaction ou amélioration d'une Analyse Fonctionnelle</li>
+            <li>Synthèse de réunion de projet à partir de notes brutes</li>
+            <li>Exploitation de PDF et documentations techniques</li>
+            <li>Préparation et reformulation de mails techniques client</li>
+            <li>Structuration de livrables et comptes-rendus</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <button class="backBtn" onclick="goBackMain()">⬅ Retour</button>
+</div>
+
+<!-- PAGE GUIDE AF -->
+<div id="bureauAfPage" class="page">
+  <div id="bureauPage">
+    <div class="bureau-page-inner">
+      <div class="bureau-page-title">
+        <span style="font-size:2rem">📋</span>
+        <h1>Analyse Fonctionnelle</h1>
+      </div>
+
+      <div class="bureau-guide-step expanded">
+        <div class="bureau-guide-step-header" onclick="toggleBureauStep(this)">
+          <div class="bureau-guide-step-badge">1</div>
+          <span class="bureau-guide-step-title">Préparer les sources &amp; anonymiser</span>
+          <span class="bureau-guide-chevron">▼</span>
+        </div>
+        <div class="bureau-guide-body">
+          <p>Avant toute transmission à l'IA, supprimer toutes les données sensibles :</p>
+          <div class="bureau-guide-dont">❌ Supprimer : adresses IP, noms clients, architecture réseau, références contractuelles, noms de sites.</div>
+          <div class="bureau-guide-do">✅ Remplacer par des alias neutres : IP_X, CLIENT_A, PROJET_XYZ, SITE_1</div>
+          <p style="margin-top:12px"><strong>Créer un dossier de travail dédié</strong> dans ChatGPT (ex : Projet_Agro_2026_AF) :</p>
+          <ul class="bureau-guide-list">
+            <li>Créer un projet/dossier dédié avec un nom explicite</li>
+            <li>Définir le contexte professionnel dans les paramètres du projet</li>
+            <li>Importer les sources ou faire des captures ciblées</li>
+            <li>Créer un nouveau chat avec un titre correspondant à l'objectif</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="bureau-guide-step">
+        <div class="bureau-guide-step-header" onclick="toggleBureauStep(this)">
+          <div class="bureau-guide-step-badge">2</div>
+          <span class="bureau-guide-step-title">Générer une AF structurée — Prompt</span>
+          <span class="bureau-guide-chevron">▼</span>
+        </div>
+        <div class="bureau-guide-body">
+          <p>Structurez votre prompt en <strong>4 blocs essentiels</strong> :</p>
+          <div class="bureau-guide-tip">⚠️ Imposez VOTRE structure standard : Description → CI → CB → Séquences → Défauts</div>
+          <div class="prompt-box">
+            <div class="prompt-box-header">
+              <span class="prompt-box-label">🛠 Prompt — Génération AF</span>
+              <button class="prompt-copy-btn" onclick="copyBureauPrompt(this)">Copier</button>
+            </div>
+            <pre>Contexte :
+Le projet concerne un skid de dépotage de lait (IBC).
+Objectif : transférer du lait vers une cuve avec gestion PV/GV.
+
+Sources :
+- Liste E/S
+- PID
+- Analyse fonctionnelle existante
+
+Objectif :
+Rédiger la fonction "Dépotage lait vers cuve".
+
+Structure OBLIGATOIRE (à respecter) :
+- Définition de la fonction
+- Conditions initiales (CI)
+- Actions / séquence de fonctionnement
+- Conditions bloquantes (CB)
+- Défauts associés
+- Particularités process
+
+Contraintes :
+- Ne pas inventer d'informations
+- Respecter strictement la structure
+- Utiliser un vocabulaire industriel</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="bureau-guide-step">
+        <div class="bureau-guide-step-header" onclick="toggleBureauStep(this)">
+          <div class="bureau-guide-step-badge">3</div>
+          <span class="bureau-guide-step-title">Améliorer &amp; corriger une AF existante — Prompt</span>
+          <span class="bureau-guide-chevron">▼</span>
+        </div>
+        <div class="bureau-guide-body">
+          <p>L'IA peut relire une AF existante pour détecter des incohérences :</p>
+          <ul class="bureau-guide-list">
+            <li>Vérification des conditions initiales (CI) et bloquantes (CB)</li>
+            <li>Détection des conflits de fonctions</li>
+            <li>Complétion des défauts process</li>
+            <li>Vérification de cohérence E/S ↔ CdC</li>
+          </ul>
+          <div class="prompt-box">
+            <div class="prompt-box-header">
+              <span class="prompt-box-label">🛠 Prompt — Révision AF</span>
+              <button class="prompt-copy-btn" onclick="copyBureauPrompt(this)">Copier</button>
+            </div>
+            <pre>Contexte :
+Le projet concerne un système automatisé industriel.
+Une AF a déjà été rédigée mais doit être vérifiée et améliorée.
+
+Documents fournis :
+- Analyse fonctionnelle existante
+- Cahier des charges
+- Liste d'entrées/sorties (E/S)
+
+Objectif :
+Analyser et améliorer l'AF en garantissant sa cohérence technique.
+
+Attendu :
+- Vérifier cohérence avec le CdC (respect du besoin client)
+- Vérifier cohérence avec la liste E/S (aucun oubli)
+- Vérifier les CI et les CB
+- Compléter les défauts process et équipements
+- Clarifier les séquences de fonctionnement
+
+Contraintes :
+- Ne pas inventer d'équipements non présents dans les E/S
+- Se baser uniquement sur les documents fournis
+- Respecter la structure de l'AF existante
+- Utiliser un vocabulaire industriel</pre>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <button class="backBtn" onclick="goBackMain()">⬅ Retour</button>
+</div>
+
+<!-- PAGE GUIDE RÉUNION -->
+<div id="bureauReunionPage" class="page">
+  <div id="bureauPage">
+    <div class="bureau-page-inner">
+      <div class="bureau-page-title">
+        <span style="font-size:2rem">📝</span>
+        <h1>Synthèse de Réunion</h1>
+      </div>
+
+      <div class="bureau-guide-step expanded">
+        <div class="bureau-guide-step-header" onclick="toggleBureauStep(this)">
+          <div class="bureau-guide-step-badge">1</div>
+          <span class="bureau-guide-step-title">Préparer les notes &amp; anonymiser</span>
+          <span class="bureau-guide-chevron">▼</span>
+        </div>
+        <div class="bureau-guide-body">
+          <p>Objectif : transformer des notes brutes en compte-rendu clair, structuré et exploitable.</p>
+          <ul class="bureau-guide-list">
+            <li>Copier les notes de réunion (brutes ou partielles)</li>
+            <li>Ajouter si besoin : contexte projet, liste des participants</li>
+            <li>Anonymiser les données sensibles avant envoi</li>
+          </ul>
+          <div class="bureau-guide-dont">❗ Toujours anonymiser les noms de clients et les données contractuelles</div>
+        </div>
+      </div>
+
+      <div class="bureau-guide-step">
+        <div class="bureau-guide-step-header" onclick="toggleBureauStep(this)">
+          <div class="bureau-guide-step-badge">2</div>
+          <span class="bureau-guide-step-title">Formuler le prompt de structuration</span>
+          <span class="bureau-guide-chevron">▼</span>
+        </div>
+        <div class="bureau-guide-body">
+          <div class="prompt-box">
+            <div class="prompt-box-header">
+              <span class="prompt-box-label">🛠 Prompt — Synthèse de réunion</span>
+              <button class="prompt-copy-btn" onclick="copyBureauPrompt(this)">Copier</button>
+            </div>
+            <pre>Contexte :
+Réunion projet pour le développement d'un programme
+automatisme sur un process liquide (cuves, pompes,
+vannes, régulation de niveau).
+
+Objectif :
+Transformer les notes de réunion en compte-rendu
+structuré, clair et exploitable pour une équipe technique.
+
+Consignes :
+- Ne pas inventer d'informations
+- Reformuler de manière technique et professionnelle
+- Si une information est ambiguë, le préciser
+
+Format attendu :
+- Contexte du projet
+- Points abordés
+- Décisions prises
+- Actions à réaliser (avec responsables si mentionnés)
+- Points à clarifier
+
+Notes de réunion :
+[Collez ici vos notes brutes]</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="bureau-guide-step">
+        <div class="bureau-guide-step-header" onclick="toggleBureauStep(this)">
+          <div class="bureau-guide-step-badge">3</div>
+          <span class="bureau-guide-step-title">Vérifier &amp; ajuster le résultat</span>
+          <span class="bureau-guide-chevron">▼</span>
+        </div>
+        <div class="bureau-guide-body">
+          <ul class="bureau-guide-list">
+            <li>Vérifier le contenu de la réponse point par point</li>
+            <li>Demander des compléments si nécessaire</li>
+            <li>Adapter le niveau de détail selon le destinataire (client / interne)</li>
+          </ul>
+          <div class="bureau-guide-do">✅ Toujours relire avant d'envoyer — l'IA reformule mais ne connaît pas votre contexte précis</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <button class="backBtn" onclick="goBackMain()">⬅ Retour</button>
+</div>
+
+<!-- PAGE CLOUD -->
+<div id="cloudPage" class="page">
+  <h2 id="phaseTitle"></h2>
+  <p id="cloudSubtitle" style="color:#4a5a7a; font-size:0.95rem; margin-top:-10px; margin-bottom:0;">Cliquez sur un cas d'usage pour voir les détails</p>
+  <div class="cloud" id="cloudContainer"></div>
+  <button class="backBtn" onclick="goBackMain()">⬅ Retour</button>
+</div>
+
+<!-- POP-UP -->
+<div class="popup-overlay" id="popupOverlay">
+  <div class="popup-content" id="popupContent">
+    <h3 id="popupPhase"></h3>
+    <p><strong>Problème :</strong> <span id="popupProblem"></span></p>
+    <p><strong>Solution :</strong> <span id="popupSolution"></span></p>
+    <p><strong>Prompt / Exemple :</strong> <code id="popupPrompt"></code></p>
+    <button class="copyBtn" onclick="copyPromptPopup()">Copier Prompt</button>
+    <button class="closeBtn" onclick="closePopup()">Fermer</button>
+  </div>
+</div>
+
+<script>
+
+// Données pratiques réparties par phase
+
+const data = {
+  "Analyse":[
+    {probleme:"Code Legacy / Rétrofit", solution:"Explication Code Legacy", prompt:"Tu es un automaticien senior spécialisé en rétrofit. Je vais te fournir un extrait de programme écrit en [préciser le langage : LIST, Grafcet, schéma contact Zelio...]. Ton but est de l'analyser et de me l'expliquer en français simple, comme si tu formais un junior. Décris la fonction globale, puis la logique de chaque section ou réseau. N'invente aucune information. Si une partie est ambiguë ou que tu manques de contexte, signale-le explicitement."},
+    {probleme:"Notes de réunion désorganisées", solution:"Structuration de Notes", prompt:"Tu agis comme un assistant chef de projet méthodique. Je te colle ci-dessous mes notes brutes prises durant une réunion technique. Transforme-les en un compte-rendu clair et professionnel au format Markdown. Le document doit impérativement contenir les sections suivantes : 'Participants', 'Résumé des décisions clés', et un tableau 'Plan d'Actions' avec les colonnes 'Action', 'Responsable', et 'Date butoir'."},
+    {probleme:"Choix de protocole réseau", solution:"Comparaison Protocoles", prompt:"Tu es un architecte en réseaux industriels. Je dois choisir un protocole de communication pour un nouveau projet. Compare MQTT, Profinet, et Modbus TCP dans un tableau Markdown. Les critères de comparaison doivent être : la performance en temps réel, le modèle de communication (Maître/Esclave vs Pub/Sub), la facilité d'intégration avec des systèmes IT (cloud, bases de données), la complexité de mise en œuvre, et la robustesse en milieu industriel."},
+    {probleme:"Incohérences entre documents", solution:"Cohérence Documentaire", prompt:"Tu es un projeteur en bureau d'études avec un œil de lynx. Je te fournis deux documents sous forme de texte : 1) Une nomenclature de matériel et 2) La description textuelle des composants présents sur mes schémas électriques. Compare-les et liste toutes les incohérences que tu trouves, comme par exemple : 'Le composant KA1 est dans la nomenclature mais n'est pas décrit dans les schémas', ou 'Le variateur UV10 est sur les schémas mais absent de la nomenclature'."}
+  ],
+  "Etude":[
+    {probleme:"Écriture d'un bloc fonctionnel", solution:"Création Bloc Fonctionnel", prompt:"Tu es un développeur automate expert en programmation structurée (IEC 61131-3). Écris un bloc fonctionnel (FB) complet en langage ST (Texte Structuré) pour TIA Portal. Le bloc doit gérer un moteur et s'appeler FB_Motor. Il doit avoir des entrées pour la commande de marche, la consigne de vitesse, et un reset défaut. Il doit avoir des sorties pour le statut (en marche, à l'arrêt, en défaut) et la vitesse actuelle. Le code doit être commenté et robuste."},
+    {probleme:"Tests d'objets automatisés", solution:"Génération Tests Unitaires", prompt:"Tu es un ingénieur test et validation en automatisme. Pour le bloc fonctionnel FB_Motor que je te fournis, génère une liste de 10 cas de test unitaires pertinents. Les tests doivent couvrir le fonctionnement nominal (marche/arrêt), les cas limites (consigne de vitesse à 0, vitesse max), et les cas d'erreur (déclenchement d'un défaut, reset)."},
+    {probleme:"Trouver une fonction dans le code", solution:"Script Recherche Fonction", prompt:"Tu es un expert des outils d'ingénierie avancés. Écris un script en Python pour l'API de TIA Portal. Le but du script est de parcourir l'intégralité d'un projet automate et de lister tous les endroits (blocs, réseaux) où la variable globale 'G_Emergency_Stop' est utilisée en lecture."},
+    {probleme:"Créer un élément graphique HMI", solution:"Création Graphique SVG", prompt:"Tu es un designer d'interfaces HMI. Génère le code XML pour un graphique vectoriel au format SVG représentant une vanne simple. Le SVG doit contenir un corps de vanne et un actionneur. L'actionneur doit avoir un identifiant (ID) unique, par exemple 'actuator_fill', pour que je puisse ensuite le manipuler via un script dans mon SCADA."},
+    {probleme:"Charte graphique IHM à définir", solution:"Charte Graphique IHM", prompt:"Tu es un ergonome spécialisé en interfaces industrielles (IHM/SCADA). Propose une charte graphique simple et efficace, en respectant la norme ISA-101. Fournis les codes couleurs (HEX ou RGB) pour : l'état normal (gris neutre), une alarme active non acquittée (décrire un rouge clignotant), une alarme active acquittée (rouge fixe), et un état manuel (cyan). Justifie brièvement chaque choix."},
+    {probleme:"Requête SQL sur logs de production", solution:"Écriture Requête SQL", prompt:"Tu es un expert en bases de données pour l'informatique industrielle. J'ai une table production_logs avec les colonnes timestamp (datetime), product_id (int), quantity (float), is_scrap (boolean). Écris une requête SQL qui calcule le taux de rebut (scrap rate) en pourcentage pour chaque product_id sur la journée d'hier."},
+    {probleme:"Code automate trop lent", solution:"Optimisation Cycle Automate", prompt:"Tu es un expert en optimisation de performance sur automates. Je te fournis un bloc de code en langage ST qui ralentit mon programme. Analyse-le et propose des optimisations concrètes pour réduire son temps d'exécution. Les suggestions peuvent inclure le remplacement de boucles, la limitation d'appels de fonctions lourdes, ou la réorganisation de la logique."},
+    {probleme:"Intégration API / service web", solution:"Intégration API Web", prompt:"Tu es un développeur SCADA/IIoT. Écris un script en Python, utilisable dans le moteur de scripting d'Ignition, qui exécute une requête HTTP GET sur une API météo. Le script doit parser la réponse JSON pour extraire la température actuelle et l'écrire dans un tag Ignition nommé 'Weather/CurrentTemp'."},
+    {probleme:"Tableau de bord production à concevoir", solution:"Maquette Tableau de Bord", prompt:"Tu es un consultant en Business Intelligence pour l'industrie. Propose une maquette textuelle pour un tableau de bord destiné à un responsable de production. La maquette doit inclure 4 KPIs pertinents comme le TRS, le nombre de pièces produites vs objectif, le top 3 des causes d'arrêt, et le statut de la ligne. Décris le type de graphique le plus adapté pour chaque KPI."},
+    {probleme:"Automate ne communique pas avec le MES", solution:"Diagnostic Connexion MES", prompt:"Tu es un spécialiste de l'intégration MES/Automate. Un automate n'arrive pas à communiquer avec le serveur MES (erreur de 'timeout'). Décris une méthodologie de diagnostic 'bottom-up' en 5 étapes, de la couche physique (câble) à la couche applicative (format des messages), pour trouver la source du problème."},
+    {probleme:"VMs sur serveur ne communiquent pas", solution:"Diagnostic Réseau VM", prompt:"Tu es un administrateur système expert en virtualisation. Deux VMs sur le même serveur ne communiquent pas. Décris les étapes de diagnostic : 1. Vérification IP/Masque de chaque VM. 2. Test de ping sur soi-même. 3. Vérification des pare-feux internes aux VMs. 4. Vérification de la configuration du switch virtuel (vSwitch). 5. Test avec traceroute pour voir où le paquet se perd."},
+    {probleme:"Créer 50 instances d'un objet plateforme", solution:"Duplication d'Objets", prompt:"Tu es un expert d'ArchestrA/AVEVA System Platform. Je dois créer 50 instances d'un template d'objet 'Moteur'. Décris la procédure la plus efficace pour le faire en masse, en expliquant comment attribuer automatiquement des noms et des paramètres spécifiques à chaque instance (comme l'adresse automate) à l'aide d'un fichier CSV."},
+    {probleme:"Adressage de variables sans chevauchement", solution:"Adressage de Variables", prompt:"Tu es un automaticien méthodique. Je te fournis une liste de variables avec leur type (BOOL, INT, DINT, REAL). Alloue une adresse mémoire unique pour chacune, en partant de l'adresse %MW100. Assure-toi de respecter l'alignement des données et qu'il n'y ait aucun chevauchement. Présente le résultat sous forme de tableau avec 'Nom Variable', 'Type', et 'Adresse Allouée'."}
+  ],
+  "Tests":[
+    {probleme:"Comparer deux versions de code", solution:"Comparaison de Code", prompt:"Tu es un outil de comparaison de code intelligent. Je te donne deux versions d'un même bloc fonctionnel. Analyse-les et surligne uniquement les changements logiques qui ont un impact fonctionnel. Ignore les changements de commentaires ou de formatage. Pour chaque changement, explique brièvement son impact potentiel."},
+    {probleme:"Temps de cycle automate qui explose", solution:"Diagnostic Performance", prompt:"Tu es un expert en diagnostic de performance automate. Mon temps de cycle a explosé après une modification. Je te fournis la liste des changements. Analyse cette liste et identifie la modification la plus probable qui a causé ce ralentissement. Justifie ton choix en expliquant pourquoi cette modification est 'coûteuse' en temps de cycle."},
+    {probleme:"Trame Modbus incompréhensible", solution:"Analyse Trame Modbus", prompt:"Tu es un expert en protocoles industriels. Une réponse Modbus TCP contient le code fonction 0x83 et le code d'exception 0x02. Explique ce que cela signifie : 1) Que veut dire le code fonction (réponse d'erreur) ? 2) Que veut dire le code d'exception 'Illegal Data Address' ? 3) Quelles sont les causes probables dans le programme maître qui envoie la requête ?"}
+  ],
+  "MiseEnService":[
+    {probleme:"Boucle PID qui oscille", solution:"Réglage PID", prompt:"Tu es un expert en régulation de process. Je suis devant une machine et ma boucle PID oscille. Mes paramètres sont P=1.2, I=5s, D=0.5s. Guide-moi pas à pas pour affiner ces réglages. Pose-moi des questions et propose une méthode simple (comme par approches successives) : 'Commence par mettre I et D à zéro. Augmente P jusqu'à avoir une petite oscillation stable...'"},
+    {probleme:"Capteur à ultrasons difficile à régler", solution:"Réglage Capteur Complexe", prompt:"Tu es un spécialiste en instrumentation. Je règle un capteur à ultrasons sur un liquide qui mousse. Explique-moi clairement le rôle des paramètres suivants et donne-moi un conseil de réglage pour chacun : 1) Fenêtre de détection. 2) Temps de moyennage du signal. 3) Fonction de suppression de l'avant-plan."},
+    {probleme:"Code d'erreur inconnu sur variateur", solution:"Traduction Code Erreur", prompt:"Tu es une base de connaissance technique multimarque. Je te donne un code d'erreur : 'F7801' sur un variateur Siemens SINAMICS G120. 'Traduis' ce code en une explication claire : 1) Quel est le nom de l'erreur ? 2) Quelle est sa cause la plus probable ? 3) Quelles sont les 3 premières actions à effectuer pour la résoudre ?"},
+    {probleme:"Conflit IP ou port bloqué", solution:"Diagnostic Conflit Réseau", prompt:"Tu es un technicien réseau expert. Je suspecte un conflit d'adresse IP sur site. Donne-moi les commandes Windows (cmd) et la procédure pour : 1) Lister les connexions actives (netstat -ano). 2) Trouver l'adresse MAC associée à une IP (arp -a). Explique comment interpréter les résultats pour identifier un conflit."}
+  ],
+  "SAV":[
+    {probleme:"Pièce de rechange non identique", solution:"Compatibilité Matériel", prompt:"Tu es un expert en matériel d'automatisme. Je dois remplacer la pièce [Référence A] par [Référence B]. Analyse les fiches techniques de ces deux produits et donne-moi une liste claire des différences : 1) Physiques (taille, connectique). 2) Électriques (alimentation). 3) De configuration logicielle à ne surtout pas oublier."},
+    {probleme:"Défaut variateur de vitesse OV", solution:"Diagnostic Panne Variateur", prompt:"Tu es un spécialiste des variateurs de vitesse. Un client signale un défaut 'OV' (surtension sur le bus DC) sur son variateur lors des freinages. Explique les causes possibles (rampe de décélération trop courte, absence ou panne de la résistance de freinage) et la procédure de diagnostic pour les différencier."},
+    {probleme:"Client ne peut pas se connecter à distance", solution:"Diagnostic Réseau à Distance", prompt:"Tu es un technicien de support à distance. Un client ne parvient pas à se connecter à un équipement. Guide-le pas à pas en lui donnant des commandes simples pour cmd : Commence par ping [adresse_ip], puis tracert [adresse_ip], et enfin telnet [adresse_ip] [port]. Explique ce que chaque commande teste et comment interpréter un succès ou un échec."}
+  ]
+};
+
+// Couleurs par phase
+
+const phaseColors = {
+  "Objectif":"#0078d4", "Analyse":"#0078d4",
+  "Pourquoi":"#28a745", "Etude":"#28a745",
+  "Rôle":"#ffc107", "Tests":"#ffc107",
+  "Outils":"#17a2b8", "MiseEnService":"#17a2b8",
+  "Pratiques":"#dc3545", "SAV":"#dc3545",
+  "Supports":"#6f42c1"
+};
+
+// Données Cercle Gauche
+const leftPhases = [
+  { name:"Objectif", fullTitle:"🎯 Objectif du support", icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/></svg>'},
+  { name:"Pourquoi", fullTitle:"🚀 Pourquoi parler d'IA en automatisme ?", icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r="0.8" fill="currentColor"/></svg>'},
+  { name:"Rôle", fullTitle:"📈 Ce que l'IA peut faire (et ne pas faire)?", icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 8h4M7 11h2M13 8l2 2-2 2"/></svg>'},
+  { name:"Outils", fullTitle:"🔧 Outils IA recommandés – PAR USAGE", icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>'},
+  { name:"Pratiques", fullTitle:"👍 Bonnes pratiques d'utilisation", icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>'},
+  { name:"Supports", fullTitle:"🧩 SUPPORTS IA", icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>'}
+];
+
+// Données Cercle Droite
+const rightPhases = [
+  {name:"Analyse", icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>'},
+  {name:"Etude", icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>'},
+  {name:"Tests", icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>'},
+  {name:"MiseEnService", icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>'},
+  {name:"SAV", icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="9" y1="10" x2="9" y2="10" stroke-width="2"/><line x1="12" y1="10" x2="12" y2="10" stroke-width="2"/><line x1="15" y1="10" x2="15" y2="10" stroke-width="2"/></svg>'}
+];
+
+// --- CREATION DES CERCLES ---
+// Cercle gauche dans sa colonne
+const wrapperLeft = document.getElementById('circleLeftWrapper');
+const circleLeft = document.createElement('div');
+circleLeft.id = 'circle-left';
+circleLeft.className = 'circle-container';
+wrapperLeft.appendChild(circleLeft);
+
+// Cercle droit dans sa colonne
+const wrapperRight = document.getElementById('circleRightWrapper');
+const circleRight = document.createElement('div');
+circleRight.id = 'circle-right';
+circleRight.className = 'circle-container';
+wrapperRight.appendChild(circleRight);
+
+function populateCircle(container, phaseArray, isLeft) {
+    // Paramètres selon le cercle
+    const radius  = isLeft ? 150 : 105;
+    const centerX = isLeft ? 200 : 145;
+    const centerY = isLeft ? 200 : 145;
+    const offset  = isLeft ? 50  : 36;   // moitié de la taille de l'icône
+    phaseArray.forEach((p, i)=>{
+      const angle = (i / phaseArray.length) * 2 * Math.PI - Math.PI/2; 
+      const x = centerX + radius * Math.cos(angle) - offset;
+      const y = centerY + radius * Math.sin(angle) - offset;
+      const div = document.createElement('div');
+      div.className = `icon ${p.name}`;
+      div.style.left = x+'px';
+      div.style.top = y+'px';
+      div.innerHTML = p.icon + p.name;
+      
+      if(isLeft) {
+        if (p.name === "Objectif") { div.onclick = () => showObjectivePage(); } 
+        else if (p.name === "Pourquoi") { div.onclick = () => showWhyPage(); }
+        else if (p.name === "Rôle") { div.onclick = () => showRolePage(); }
+        else if (p.name === "Outils") { div.onclick = () => showToolsPage(); }
+        else if (p.name === "Pratiques") { div.onclick = () => showPratiquesPage(); }
+        else if (p.name === "Supports") { div.onclick = () => showSupportsPage(); }
+        else { div.onclick = () => showInfoPage(p.fullTitle); }
+      } else {
+        div.onclick = () => showPhase(p.name);
+      }
+      container.appendChild(div);
+  });
+}
+
+populateCircle(circleLeft, leftPhases, true);
+populateCircle(circleRight, rightPhases, false);
+
+// Label DANS le cercle gauche (Concepts & Ressources)
+const labelLeft = document.createElement('div');
+labelLeft.className = 'circle-label circle-label-inside';
+labelLeft.innerHTML = '<span>Concepts</span><span>&amp; Ressources</span>';
+circleLeft.appendChild(labelLeft);
+
+
+// --- NAVIGATION ---
+let currentPhase = '';
+let currentSolutionIndex = 0;
+
+function showObjectivePage() { document.getElementById('mainPage').classList.remove('active'); document.getElementById('objectivePage').classList.add('active'); }
+function showWhyPage() { document.getElementById('mainPage').classList.remove('active'); document.getElementById('whyPage').classList.add('active'); }
+function showRolePage() { document.getElementById('mainPage').classList.remove('active'); document.getElementById('rolePage').classList.add('active'); }
+function showToolsPage() { document.getElementById('mainPage').classList.remove('active'); document.getElementById('toolsPage').classList.add('active'); }
+function showPratiquesPage() { document.getElementById('mainPage').classList.remove('active'); document.getElementById('pratiquesPage').classList.add('active'); }
+function showSupportsPage() { document.getElementById('mainPage').classList.remove('active'); document.getElementById('supportsPage').classList.add('active'); }
+
+function showInfoPage(title) {
+  document.getElementById('mainPage').classList.remove('active');
+  const cloudPage = document.getElementById('cloudPage');
+  cloudPage.classList.add('active');
+  const cloudTitle = document.getElementById('phaseTitle');
+  cloudTitle.innerText = title;
+  cloudTitle.style.background = phaseColors[title.split(" ")[1]] || '#6c757d';
+  document.getElementById('cloudContainer').innerHTML = '';
+}
+
+function showPhase(phase){
+  currentPhase = phase;
+  const color = phaseColors[phase];
+  const cloudTitle = document.getElementById('phaseTitle');
+  cloudTitle.style.background = color;
+  document.getElementById('mainPage').classList.remove('active');
+  document.getElementById('cloudPage').classList.add('active');
+  cloudTitle.innerText = phase;
+  const cloud = document.getElementById('cloudContainer');
+  cloud.innerHTML='';
+
+  data[phase].forEach((ex, idx)=>{
+    const div = document.createElement('div');
+    div.className='cloud-item';
+    div.style.background = color + '22';
+    div.style.borderColor = color + '55';
+    div.style.color = '#101C28';
+    div.style.boxShadow = '0 4px 20px ' + color + '33';
+    div.innerText=ex.solution;
+    div.onmouseenter = () => { div.style.background = color + '55'; div.style.boxShadow = '0 8px 30px ' + color + '66'; div.style.color = '#101C28'; };
+    div.onmouseleave = () => { div.style.background = color + '22'; div.style.boxShadow = '0 4px 20px ' + color + '33'; div.style.color = '#101C28'; };
+    div.onclick=()=>showPopup(idx);
+    cloud.appendChild(div);
+  });
+}
+
+function showPopup(idx){
+  currentSolutionIndex = idx;
+  const overlay = document.getElementById('popupOverlay');
+  const popupPhase = document.getElementById('popupPhase');
+  const popupProblem = document.getElementById('popupProblem');
+  const popupSolution = document.getElementById('popupSolution');
+  const popupPrompt = document.getElementById('popupPrompt');
+  const ex = data[currentPhase][idx];
+  popupPhase.innerText = currentPhase;
+  popupProblem.innerText = ex.probleme;
+  popupSolution.innerText = ex.solution;
+  popupPrompt.innerText = ex.prompt;
+  overlay.style.display = 'flex';
+}
+
+function closePopup(){
+  document.getElementById('popupOverlay').style.display='none';
+}
+
+function copyPromptPopup(){
+  const text = data[currentPhase][currentSolutionIndex].prompt;
+  navigator.clipboard.writeText(text);
+  alert('Prompt copié !');
+}
+
+function goBackMain(){
+  document.getElementById('cloudPage').classList.remove('active');
+  document.getElementById('objectivePage').classList.remove('active');
+  document.getElementById('whyPage').classList.remove('active');
+  document.getElementById('rolePage').classList.remove('active');
+  document.getElementById('toolsPage').classList.remove('active');
+  document.getElementById('pratiquesPage').classList.remove('active');
+  document.getElementById('supportsPage').classList.remove('active');
+  ['bureauCadrePage','bureauAfPage','bureauReunionPage'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('active');
+  });
+  document.getElementById('mainPage').classList.add('active');
+}
+
+
+// ── GUIDES BUREAUTIQUE ───────────────────────────────────────
+function showBureauPage(type) {
+  document.getElementById('mainPage').classList.remove('active');
+  const map = { 'cadre': 'bureauCadrePage', 'af': 'bureauAfPage', 'reunion': 'bureauReunionPage' };
+  document.getElementById(map[type]).classList.add('active');
+}
+
+function toggleBureauStep(headerEl) {
+  const step = headerEl.closest('.bureau-guide-step');
+  step.classList.toggle('expanded');
+}
+
+function copyBureauPrompt(btn) {
+  const pre = btn.closest('.prompt-box').querySelector('pre');
+  navigator.clipboard.writeText(pre.textContent);
+  const orig = btn.textContent;
+  btn.textContent = '✓ Copié !';
+  btn.style.background = 'var(--green-600)';
+  setTimeout(() => { btn.textContent = orig; btn.style.background = ''; }, 2000);
+}
+
+</script>
+
+
+
+
+</body>
+
+</html>
